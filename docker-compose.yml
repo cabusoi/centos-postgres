@@ -1,21 +1,26 @@
 version: '2'
 services:
 
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
-    environment:
-     - ACCEPT_EULA=Y
-     - SA_PASSWORD=P4ssw0rD
-    ports:
-    - "1443:1443"
+#  mssql:
+#    image: mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
+#    environment:
+#     - ACCEPT_EULA=Y
+#     - SA_PASSWORD=P4ssw0rD
+#    ports:
+#    - "1443:1443"
+
   postgres:
-    build: 
-      context: ./postgres11alpine
-      dockerfile: ./Dockerfile  
-    image: ggcsr-pg11alpine
+#    build: 
+#      context: ./postgres11alpine
+#      dockerfile: ./Dockerfile  
+#    image: ggcsr-pg11alpine
+    image: cbusoi/pg11alpine-tds_fdw
     ports:
-    - "6432:5432"
-    depends_on:
-    - "mssql"
-#   command:
-#   - "su postgres -c postgres -i -c config_file=/var/lib/pgsql/data/postgresql.conf && psql -U postgres -a -f setup-fdw.sql"
+    - "5432:5432"
+#    depends_on:
+#    - "mssql"
+    volumes:
+    - .:/var/data/pg
+#    command:
+#    - "su postgres -c postgres -i -c config_file=/var/lib/pgsql/data/postgresql.conf"
+#    - "psql -U postgres -a -f /var/data/pg/setup-fdw.sql"
