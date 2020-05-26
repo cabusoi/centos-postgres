@@ -26,6 +26,7 @@ spec:
     spec:
       containers:
       - args:
+        - su postgres -c postgres -i -c config_file=/var/lib/pgsql/data/postgresql.conf
         - su postgres -c echo IMPORT FOREIGN SCHEMA dbo FROM SERVER import_server
           INTO import_schema OPTIONS (import_default 'true') | psql -U postgres -d
           workspace
@@ -36,6 +37,8 @@ spec:
           value: import_server
         - name: MSSQL_SCHEMA
           value: dbo
+        - name: PGDATA
+          value: /var/lib/pgsql/data
         image: cbusoi/pg11alpine-tds_fdw
         imagePullPolicy: ""
         name: postgres
@@ -43,16 +46,11 @@ spec:
         - containerPort: 5432
         resources: {}
         volumeMounts:
-        - mountPath: /var/data/pg
-          name: postgres-claim0
         - mountPath: /var/lib/pgsql/data
           name: db-data
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
-      - name: postgres-claim0
-        persistentVolumeClaim:
-          claimName: postgres-claim0
       - name: db-data
         persistentVolumeClaim:
           claimName: db-data
