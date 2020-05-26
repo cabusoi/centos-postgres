@@ -1,3 +1,4 @@
-sqltools
+sqltools*
 .history
-
+modeler-task-idm-admin-postgres.yml
+portworx.*

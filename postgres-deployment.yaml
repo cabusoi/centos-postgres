@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    kompose.cmd: kompose -f docker-compose.yml convert
+    kompose.cmd: kompose convert -f ./docker-compose.yml
     kompose.version: 1.21.0 (992df58d8)
   creationTimestamp: null
   labels:
@@ -18,14 +18,25 @@ spec:
   template:
     metadata:
       annotations:
-        kompose.cmd: kompose -f docker-compose.yml convert
+        kompose.cmd: kompose convert -f ./docker-compose.yml
         kompose.version: 1.21.0 (992df58d8)
       creationTimestamp: null
       labels:
         io.kompose.service: postgres
     spec:
       containers:
-      - image: cbusoi/pg11alpine-tds_fdw
+      - args:
+        - su postgres -c echo IMPORT FOREIGN SCHEMA dbo FROM SERVER import_server
+          INTO import_schema OPTIONS (import_default 'true') | psql -U postgres -d
+          workspace
+        env:
+        - name: IMPORT_SCHEMA
+          value: import_schema
+        - name: IMPORT_SERVER
+          value: import_server
+        - name: MSSQL_SCHEMA
+          value: dbo
+        image: cbusoi/pg11alpine-tds_fdw
         imagePullPolicy: ""
         name: postgres
         ports:
@@ -34,10 +45,15 @@ spec:
         volumeMounts:
         - mountPath: /var/data/pg
           name: postgres-claim0
+        - mountPath: /var/lib/pgsql/data
+          name: db-data
       restartPolicy: Always
       serviceAccountName: ""
       volumes:
       - name: postgres-claim0
         persistentVolumeClaim:
           claimName: postgres-claim0
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: db-data
 status: {}

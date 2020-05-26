@@ -6,14 +6,14 @@ metadata:
     kompose.version: 1.21.0 (992df58d8)
   creationTimestamp: null
   labels:
-    io.kompose.service: postgres
-  name: postgres
+    io.kompose.service: mssql
+  name: mssql
 spec:
   ports:
-  - name: "5432"
-    port: 5432
-    targetPort: 5432
+  - name: "1443"
+    port: 1443
+    targetPort: 1443
   selector:
-    io.kompose.service: postgres
+    io.kompose.service: mssql
 status:
   loadBalancer: {}

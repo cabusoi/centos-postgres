@@ -1,26 +1,43 @@
-version: '2'
+version: '3.6'
 services:
 
-#  mssql:
-#    image: mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
-#    environment:
-#     - ACCEPT_EULA=Y
-#     - SA_PASSWORD=P4ssw0rD
-#    ports:
-#    - "1443:1443"
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2017-CU8-ubuntu
+    environment:
+     - ACCEPT_EULA=Y
+     - SA_PASSWORD=P4ssw0rD
+    ports:
+    - "1443:1443"
 
   postgres:
-#    build: 
-#      context: ./postgres11alpine
-#      dockerfile: ./Dockerfile  
-#    image: ggcsr-pg11alpine
+    build: 
+      context: ./pg11alpine-tds_fdw
+      dockerfile: ./Dockerfile  
+      args: 
+        PGDATA: /var/lib/pgsql/data
+        PGADMINPASS: postgres
+        PGPGPASS: postgres
+        PGDBNAME: workspace
+        MSSQL_SERVER: mssql
+        MSSQL_DB: master
+        MSSQL_USER: sa
+        MSSQL_PASS: P4ssw0rD
+        MSSQL_SCHEMA: dbo
     image: cbusoi/pg11alpine-tds_fdw
+    environment: 
+      IMPORT_SERVER: import_server
+      IMPORT_SCHEMA: import_schema
+      MSSQL_SCHEMA: dbo
     ports:
     - "5432:5432"
-#    depends_on:
-#    - "mssql"
+    depends_on:
+    - "mssql"
     volumes:
-    - .:/var/data/pg
-#    command:
-#    - "su postgres -c postgres -i -c config_file=/var/lib/pgsql/data/postgresql.conf"
-#    - "psql -U postgres -a -f /var/data/pg/setup-fdw.sql"
+    - ".:/var/data/pg"
+    - "db-data:/var/lib/pgsql/data"
+    command:
+    - "su postgres -c echo IMPORT FOREIGN SCHEMA dbo FROM SERVER import_server INTO import_schema OPTIONS (import_default 'true') | psql -U postgres -d workspace"
+#   - "su postgres -c postgres -i -c config_file=/var/lib/pgsql/data/postgresql.conf"
+#   - "psql -U postgres -a -f /var/data/pg/setup-fdw.sql"
+volumes:
+  db-data:
